@@ -32,8 +32,6 @@ def _parse_line_items(text: str) -> List[Dict[str, Any]]:
     table_text = table_match.group(1)
     lines = table_text.strip().split('\n')
 
-    # This regex is designed to be robust to OCR errors in the table.
-    # It captures: 1:Description, 2:Quantity, 3:Unit Price, 4:Line Total
     line_pattern = re.compile(r"^(.*?)\s*?(\d+)\s*.*?([\d,]+\.\d{2})\s*\|?\s*([\d,]+\.\d{2})$")
 
     for line in lines:
@@ -64,11 +62,22 @@ def extract_invoice_data(text: str) -> Dict[str, Any]:
         'invoice_id': r"FACTURE N°:\s*(\S+)",
         'date': r"Date:\s*(\d{2}/\d{2}/\d{4})",
         'total_ht': r"Total HT:\s*([\d\s,.]+)",
-        'vat_amount': r"TVA\s*(?:\(\s*\d+\s*%\))?:\s*([\d\s,.]+)",
         'total_ttc': r"Total TTC:\s*([\d\s,.]+)"
     }
 
     raw_data = {key: _search_pattern(text, pat) for key, pat in patterns.items()}
+
+    # Custom handling for VAT to extract both rate and amount
+    vat_rate = None
+    vat_amount_str = None
+    vat_pattern = r"TVA\s*\(?\s*(\d+\.?\d*)\s*%\s*\)?:\s*([\d\s,.]+)"
+    vat_match = re.search(vat_pattern, text, re.IGNORECASE)
+    if vat_match:
+        vat_rate = _parse_amount(vat_match.group(1))
+        vat_amount_str = vat_match.group(2)
+    else:
+        # Fallback to old pattern if rate is not found, just get the amount
+        vat_amount_str = _search_pattern(text, r"TVA:\s*([\d\s,.]+)")
 
     line_items = _parse_line_items(text)
 
@@ -76,7 +85,8 @@ def extract_invoice_data(text: str) -> Dict[str, Any]:
         'invoice_id': raw_data.get('invoice_id'),
         'date': raw_data.get('date'),
         'total_ht': _parse_amount(raw_data.get('total_ht')),
-        'vat_amount': _parse_amount(raw_data.get('vat_amount')),
+        'vat_rate': vat_rate,
+        'vat_amount': _parse_amount(vat_amount_str),
         'total_ttc': _parse_amount(raw_data.get('total_ttc')),
         'line_items': line_items
     }

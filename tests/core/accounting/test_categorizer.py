@@ -34,8 +34,6 @@ class TestCategorizer(unittest.TestCase):
     def test_multiple_keywords(self):
         """Tests that the first keyword found determines the category."""
         description = "Assurance pour la location de voiture"
-        # 'assurance' should be found before 'location' if iterating through a dict
-        # This test depends on the dict's insertion order for Python 3.7+
         expected_category = "Primes d'assurance"
         self.assertEqual(categorize_item(description), expected_category)
 

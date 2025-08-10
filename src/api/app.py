@@ -1,17 +1,19 @@
 import os
-from flask import Flask, jsonify, send_from_directory
-
-# This is a bit of a hack to make sure we can import from the parent `src` directory.
-# A better solution in a larger app would be a proper package installation (setup.py).
 import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import io
+from flask import Flask, jsonify, send_from_directory, make_response
 
-from core.ocr.extractor import extract_invoice_data
-from core.ocr.reader import extract_text_from_image
-from core.reporting.summaries import generate_financial_summary
+# Add the project root to the Python path to allow imports from `src`
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+from src.core.ocr.extractor import extract_invoice_data
+from src.core.ocr.reader import extract_text_from_image
+from src.core.reporting.summaries import generate_financial_summary
+from src.core.accounting.journal import generate_entries_from_invoice
+from src.core.export.fec_exporter import export_to_fec
+
 
 # Define paths relative to the location of this app.py file
-# Assumes app.py is in src/api/
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 WEB_DIR = os.path.join(SRC_DIR, '..', 'web')
 DATA_DIR = os.path.join(SRC_DIR, '..', '..', 'data', 'invoices')
@@ -27,26 +29,46 @@ def serve_dashboard():
 def get_financial_summary():
     """
     Processes a sample invoice and returns a financial summary.
-    In a real app, this would process multiple invoices, likely from a database.
     """
     try:
-        # For this demonstration, we process one specific invoice to generate a summary.
         invoice_path = os.path.join(DATA_DIR, 'synthetic_invoice.png')
-
         if not os.path.exists(invoice_path):
             return jsonify({"error": "Sample invoice not found."}), 404
 
         raw_text = extract_text_from_image(invoice_path)
         invoice_data = extract_invoice_data(raw_text)
-
-        # The summary function expects a list of invoices.
         summary_data = generate_financial_summary([invoice_data])
 
         return jsonify(summary_data)
-
     except Exception as e:
-        # In a real app, you'd have more specific error handling and logging.
         return jsonify({"error": "An internal error occurred.", "details": str(e)}), 500
+
+@app.route('/api/export/fec')
+def export_fec_file():
+    """
+    Generates and returns a FEC file for download based on a sample invoice.
+    """
+    try:
+        # 1. Process the invoice to get accounting entries
+        invoice_path = os.path.join(DATA_DIR, 'synthetic_invoice.png')
+        if not os.path.exists(invoice_path):
+            return jsonify({"error": "Sample invoice not found."}), 404
+
+        raw_text = extract_text_from_image(invoice_path)
+        invoice_data = extract_invoice_data(raw_text)
+        entries = generate_entries_from_invoice(invoice_data)
+
+        # 2. Export entries to FEC format
+        fec_content = export_to_fec(entries)
+
+        # 3. Create a response to trigger a file download
+        response = make_response(fec_content)
+        response.headers["Content-Disposition"] = "attachment; filename=fec.txt"
+        response.headers["Content-Type"] = "text/plain; charset=utf-8"
+
+        return response
+    except Exception as e:
+        return jsonify({"error": "An internal error occurred during FEC export.", "details": str(e)}), 500
 
 @app.route('/api/health')
 def health_check():

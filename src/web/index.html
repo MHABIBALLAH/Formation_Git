@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComptaAI - Tableau de Bord</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; background-color: #f4f7f6; color: #333; }
+        h1 { color: #2a7a7b; }
+        .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5em; margin-top: 2em; }
+        .card { background-color: white; border: 1px solid #ddd; border-radius: 8px; padding: 1.5em; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .card h2 { margin-top: 0; font-size: 1em; color: #666; }
+        .card .value { font-size: 2.2em; font-weight: bold; color: #2a7a7b; margin: 0.5em 0 0 0; }
+        #error-message { color: #d9534f; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>Tableau de Bord Financier</h1>
+
+    <div id="summary-container" class="summary">
+        <div class="card">
+            <h2>Chiffre d'Affaires Total</h2>
+            <p class="value" id="total-revenue">--</p>
+        </div>
+        <div class="card">
+            <h2>Dépenses Totales (HT)</h2>
+            <p class="value" id="total-expenses-ht">--</p>
+        </div>
+        <div class="card">
+            <h2>Résultat Net</h2>
+            <p class="value" id="net-profit-loss">--</p>
+        </div>
+        <div class="card">
+            <h2>TVA Déductible</h2>
+            <p class="value" id="total-vat-deductible">--</p>
+        </div>
+    </div>
+    <p id="error-message"></p>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/summary')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok. Status: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('total-revenue').textContent = data.total_revenue.toFixed(2) + ' €';
+                    document.getElementById('total-expenses-ht').textContent = data.total_expenses_ht.toFixed(2) + ' €';
+                    document.getElementById('net-profit-loss').textContent = data.net_profit_loss.toFixed(2) + ' €';
+                    document.getElementById('total-vat-deductible').textContent = data.total_vat_deductible.toFixed(2) + ' €';
+                })
+                .catch(error => {
+                    console.error('Error fetching summary data:', error);
+                    document.getElementById('error-message').textContent = 'Erreur lors du chargement des données du tableau de bord.';
+                });
+        });
+    </script>
+
+</body>
+</html>

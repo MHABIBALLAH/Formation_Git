@@ -61,7 +61,6 @@ def register_main_routes(app):
     DATA_DIR = os.path.join(PROJECT_ROOT, 'data', 'invoices')
 
     @app.route('/')
-    @login_required
     def serve_dashboard():
         return send_from_directory(WEB_DIR, 'index.html')
 

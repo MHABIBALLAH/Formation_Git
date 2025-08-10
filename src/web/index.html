@@ -3,88 +3,242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ComptaAI - Tableau de Bord</title>
+    <title>ComptaAI</title>
     <style>
-        body { font-family: sans-serif; margin: 0; background-color: #f4f7f6; color: #333; }
-        .container { padding: 2em; }
-        header { background-color: #2a7a7b; color: white; padding: 1em 2em; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; background-color: #f4f7f6; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { width: 100%; }
+        /* Auth Form Styles */
+        .auth-container { max-width: 400px; margin: auto; padding: 2em; background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .auth-container h2 { text-align: center; color: #2a7a7b; }
+        .form-group { margin-bottom: 1.5em; }
+        .form-group label { display: block; margin-bottom: 0.5em; font-weight: bold; }
+        .form-group input { width: 100%; padding: 0.8em; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .btn { display: block; width: 100%; background-color: #2a7a7b; color: white; padding: 0.8em 1.2em; border: none; border-radius: 5px; text-decoration: none; font-weight: bold; text-align: center; cursor: pointer; font-size: 1em; }
+        .btn:hover { background-color: #236667; }
+        .toggle-link { text-align: center; margin-top: 1em; }
+        .toggle-link a { color: #2a7a7b; text-decoration: none; cursor: pointer; }
+        .error-message { color: #d9534f; font-weight: bold; margin-top: 1em; text-align: center; }
+        /* Dashboard Styles */
+        header { background-color: #2a7a7b; color: white; padding: 1em 2em; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
         header h1 { margin: 0; font-size: 1.5em; }
-        nav ul { list-style: none; margin: 0; padding: 0; }
-        nav ul li { display: inline; margin-right: 1.5em; }
-        nav ul li a { color: white; text-decoration: none; font-weight: bold; }
+        #logout-btn { background: none; border: 1px solid white; color: white; padding: 0.5em 1em; border-radius: 5px; cursor: pointer; }
+        .dashboard-container { padding: 2em; }
         h2.page-title { color: #2a7a7b; }
         .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5em; margin-top: 2em; }
         .card { background-color: white; border: 1px solid #ddd; border-radius: 8px; padding: 1.5em; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .card h3 { margin-top: 0; font-size: 1em; color: #666; }
         .card .value { font-size: 2.2em; font-weight: bold; color: #2a7a7b; margin: 0.5em 0 0 0; }
-        .btn { display: inline-block; background-color: #5cb85c; color: white; padding: 0.8em 1.2em; border-radius: 5px; text-decoration: none; font-weight: bold; }
-        #error-message { color: #d9534f; font-weight: bold; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>ComptaAI</h1>
-        <nav>
-            <ul>
-                <li><a href="/">Tableau de Bord</a></li>
-                <!-- Future links can be added here -->
-            </ul>
-        </nav>
-    </header>
+    <div id="app-container" class="container">
 
-    <main class="container">
-        <h2 class="page-title">Résumé Financier</h2>
-        <div id="summary-container" class="summary">
-            <div class="card">
-                <h3>Chiffre d'Affaires Total</h3>
-                <p class="value" id="total-revenue">--</p>
-            </div>
-            <div class="card">
-                <h3>Dépenses Totales (HT)</h3>
-                <p class="value" id="total-expenses-ht">--</p>
-            </div>
-            <div class="card">
-                <h3>Résultat Net</h3>
-                <p class="value" id="net-profit-loss">--</p>
-            </div>
-            <div class="card">
-                <h3>TVA Déductible</h3>
-                <p class="value" id="total-vat-deductible">--</p>
+        <!-- Loading View -->
+        <div id="loading-view">
+            <p style="text-align: center;">Chargement...</p>
+        </div>
+
+        <!-- Authentication View -->
+        <div id="auth-view" class="hidden">
+            <div class="auth-container">
+                <div id="login-form-container">
+                    <h2>Connexion</h2>
+                    <form id="login-form">
+                        <div class="form-group">
+                            <label for="login-username">Nom d'utilisateur</label>
+                            <input type="text" id="login-username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Mot de passe</label>
+                            <input type="password" id="login-password" required>
+                        </div>
+                        <button type="submit" class="btn">Se connecter</button>
+                    </form>
+                    <p id="login-error" class="error-message"></p>
+                    <p class="toggle-link">Pas de compte ? <a id="show-register-link">Inscrivez-vous</a></p>
+                </div>
+                <div id="register-form-container" class="hidden">
+                    <h2>Inscription</h2>
+                    <form id="register-form">
+                        <div class="form-group">
+                            <label for="register-username">Nom d'utilisateur</label>
+                            <input type="text" id="register-username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-password">Mot de passe</label>
+                            <input type="password" id="register-password" required>
+                        </div>
+                        <button type="submit" class="btn">S'inscrire</button>
+                    </form>
+                    <p id="register-message" class="error-message"></p>
+                    <p class="toggle-link">Déjà un compte ? <a id="show-login-link">Connectez-vous</a></p>
+                </div>
             </div>
         </div>
 
-        <h2 class="page-title" style="margin-top: 2em;">Exports Comptables</h2>
-        <div class="summary">
-            <div class="card">
-                <h3>Export FEC</h3>
-                <p>Télécharger le Fichier des Écritures Comptables.</p>
-                <a href="/api/export/fec" class="btn" download="FEC.txt">Télécharger</a>
-            </div>
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="hidden">
+            <header>
+                <h1>ComptaAI</h1>
+                <nav>
+                    <button id="logout-btn">Déconnexion</button>
+                </nav>
+            </header>
+            <main class="dashboard-container">
+                <h2 class="page-title">Résumé Financier</h2>
+                <div id="summary-container" class="summary">
+                    <div class="card">
+                        <h3>Chiffre d'Affaires Total</h3>
+                        <p class="value" id="total-revenue">--</p>
+                    </div>
+                    <div class="card">
+                        <h3>Dépenses Totales (HT)</h3>
+                        <p class="value" id="total-expenses-ht">--</p>
+                    </div>
+                    <div class="card">
+                        <h3>Résultat Net</h3>
+                        <p class="value" id="net-profit-loss">--</p>
+                    </div>
+                    <div class="card">
+                        <h3>TVA Déductible</h3>
+                        <p class="value" id="total-vat-deductible">--</p>
+                    </div>
+                </div>
+                <h2 class="page-title" style="margin-top: 2em;">Exports Comptables</h2>
+                <div class="summary">
+                    <div class="card">
+                        <h3>Export FEC</h3>
+                        <p>Télécharger le Fichier des Écritures Comptables.</p>
+                        <a href="/api/export/fec" class="btn" download="FEC.txt" style="display: inline-block; width: auto;">Télécharger</a>
+                    </div>
+                </div>
+            </main>
         </div>
 
-        <p id="error-message"></p>
-    </main>
+    </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('/api/summary')
-                .then(response => {
-                    if (!response.ok) { throw new Error('Network response was not ok.'); }
-                    return response.json();
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadingView = document.getElementById('loading-view');
+            const authView = document.getElementById('auth-view');
+            const dashboardView = document.getElementById('dashboard-view');
+
+            const loginFormContainer = document.getElementById('login-form-container');
+            const registerFormContainer = document.getElementById('register-form-container');
+
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const logoutBtn = document.getElementById('logout-btn');
+
+            const showRegisterLink = document.getElementById('show-register-link');
+            const showLoginLink = document.getElementById('show-login-link');
+
+            const loginError = document.getElementById('login-error');
+            const registerMessage = document.getElementById('register-message');
+
+            const switchView = (view) => {
+                loadingView.classList.add('hidden');
+                authView.classList.add('hidden');
+                dashboardView.classList.add('hidden');
+                view.classList.remove('hidden');
+            };
+
+            const fetchSummary = () => {
+                fetch('/api/summary')
+                    .then(res => res.ok ? res.json() : Promise.reject(res))
+                    .then(data => {
+                        document.getElementById('total-revenue').textContent = data.total_revenue.toFixed(2) + ' €';
+                        document.getElementById('total-expenses-ht').textContent = data.total_expenses_ht.toFixed(2) + ' €';
+                        document.getElementById('net-profit-loss').textContent = data.net_profit_loss.toFixed(2) + ' €';
+                        document.getElementById('total-vat-deductible').textContent = data.total_vat_deductible.toFixed(2) + ' €';
+                    })
+                    .catch(() => {
+                        // Handle error or if user gets logged out in another tab
+                        switchView(authView);
+                    });
+            };
+
+            const checkAuthStatus = () => {
+                fetch('/api/auth/profile')
+                    .then(res => {
+                        if (res.ok) {
+                            switchView(dashboardView);
+                            fetchSummary();
+                        } else {
+                            switchView(authView);
+                        }
+                    })
+                    .catch(() => switchView(authView));
+            };
+
+            // Event Listeners
+            showRegisterLink.addEventListener('click', () => {
+                loginFormContainer.classList.add('hidden');
+                registerFormContainer.classList.remove('hidden');
+            });
+
+            showLoginLink.addEventListener('click', () => {
+                registerFormContainer.classList.add('hidden');
+                loginFormContainer.classList.remove('hidden');
+            });
+
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                loginError.textContent = '';
+                const username = document.getElementById('login-username').value;
+                const password = document.getElementById('login-password').value;
+                fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ username, password })
                 })
-                .then(data => {
-                    document.getElementById('total-revenue').textContent = data.total_revenue.toFixed(2) + ' €';
-                    document.getElementById('total-expenses-ht').textContent = data.total_expenses_ht.toFixed(2) + ' €';
-                    document.getElementById('net-profit-loss').textContent = data.net_profit_loss.toFixed(2) + ' €';
-                    document.getElementById('total-vat-deductible').textContent = data.total_vat_deductible.toFixed(2) + ' €';
-                })
-                .catch(error => {
-                    console.error('Error fetching summary data:', error);
-                    document.getElementById('error-message').textContent = 'Erreur lors du chargement des données.';
+                .then(res => res.json().then(data => ({ok: res.ok, data})))
+                .then(({ok, data}) => {
+                    if (ok) {
+                        switchView(dashboardView);
+                        fetchSummary();
+                    } else {
+                        loginError.textContent = data.error || 'Erreur de connexion.';
+                    }
                 });
+            });
+
+            registerForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                registerMessage.textContent = '';
+                const username = document.getElementById('register-username').value;
+                const password = document.getElementById('register-password').value;
+                fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ username, password })
+                })
+                .then(res => res.json().then(data => ({ok: res.ok, data})))
+                .then(({ok, data}) => {
+                    if (ok) {
+                        registerMessage.style.color = 'green';
+                        registerMessage.textContent = 'Inscription réussie ! Vous pouvez maintenant vous connecter.';
+                        showLoginLink.click(); // Switch to login form
+                    } else {
+                        registerMessage.style.color = '#d9534f';
+                        registerMessage.textContent = data.error || 'Erreur d\'inscription.';
+                    }
+                });
+            });
+
+            logoutBtn.addEventListener('click', () => {
+                fetch('/api/auth/logout', { method: 'POST' })
+                .finally(() => {
+                    // Always switch to auth view regardless of outcome
+                    switchView(authView);
+                });
+            });
+
+            // Initial check
+            checkAuthStatus();
         });
     </script>
-
 </body>
 </html>

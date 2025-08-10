@@ -70,10 +70,11 @@ class AuthTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 401)
 
     def test_access_protected_route_without_login(self):
-        """Test that a protected route cannot be accessed without logging in."""
+        """Test that a protected route returns 401 Unauthorized without login."""
         res = self.client.get('/api/summary')
-        self.assertEqual(res.status_code, 302) # Redirect to login page
-        self.assertIn('/api/auth/login', res.location)
+        self.assertEqual(res.status_code, 401)
+        data = json.loads(res.data)
+        self.assertEqual(data['error'], 'Authentication required')
 
     def test_access_protected_route_with_login(self):
         """Test that a protected route can be accessed after logging in."""
@@ -90,7 +91,9 @@ class AuthTestCase(unittest.TestCase):
         res_logout = self.client.post('/api/auth/logout')
         self.assertEqual(res_logout.status_code, 200)
         res_after_logout = self.client.get('/api/auth/profile')
-        self.assertEqual(res_after_logout.status_code, 302)
+        self.assertEqual(res_after_logout.status_code, 401)
+        data = json.loads(res_after_logout.data)
+        self.assertEqual(data['error'], 'Authentication required')
 
 if __name__ == '__main__':
     unittest.main()

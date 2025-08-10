@@ -22,5 +22,11 @@ class TestApi(unittest.TestCase):
         data = json.loads(response.data)
         self.assertEqual(data, {"status": "ok"})
 
+    def test_root_is_public(self):
+        """Tests that the root URL ('/') is public and serves the main page."""
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'<title>ComptaAI</title>', response.data)
+
 if __name__ == '__main__':
     unittest.main()

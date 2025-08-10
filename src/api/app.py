@@ -26,6 +26,11 @@ def create_app(config_object='src.config.DevelopmentConfig'):
     login_manager.login_message = "Please log in to access this page."
     login_manager.login_message_category = 'info'
 
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        """Handle unauthorized requests for the API."""
+        return jsonify({'error': 'Authentication required'}), 401
+
     try:
         os.makedirs(app.instance_path)
     except OSError:

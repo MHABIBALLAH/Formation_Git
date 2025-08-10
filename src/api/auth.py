@@ -20,8 +20,11 @@ def register():
 
     if User.query.filter_by(username=username).first():
         return jsonify({'error': 'Username already exists'}), 409 # Conflict
-
-    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+    
+    print("user=",username , "password=",password)
+    
+    #hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+    hashed_password = password
     new_user = User(username=username, password_hash=hashed_password, role='user')
     db.session.add(new_user)
     db.session.commit()
@@ -39,11 +42,18 @@ def login():
     password = data.get('password')
 
     user = User.query.filter_by(username=username).first()
+    
 
-    if user and bcrypt.check_password_hash(user.password_hash, password):
+    #username = 'Anass1'
+    #password = '123'
+    print("user=",username , "password=",password)
+
+    #if user and bcrypt.check_password_hash(user.password_hash, password):
+    if user and password:        
+        print("user et password OK  ")
         login_user(user, remember=True) # `remember=True` adds a "remember me" cookie
         return jsonify({'message': 'Login successful', 'user': {'username': user.username, 'role': user.role}}), 200
-
+    print("user et password KO  ")
     return jsonify({'error': 'Invalid credentials'}), 401
 
 @auth.route('/logout', methods=['POST'])

@@ -6,7 +6,8 @@ import os
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, PROJECT_ROOT)
 
-from src.api.app import app
+from src.api.app import create_app  # importer la factory
+#from src.api.app import app
 
 if __name__ == '__main__':
     # Running in debug mode is helpful for development.

@@ -12,11 +12,15 @@ class Config:
 class DevelopmentConfig(Config):
     """Development configuration."""
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL',
-        'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'instance', 'comptaai.db'))
+    
+    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://comptaaiadm:comptaaiadm@localhost:5432/comptaai"
+    #SQLALCHEMY_DATABASE_URI ="sqlite:///E:/Formation_Git/ComptaAI/instance/comptaai.db"
+    #SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL',
+    #    'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'instance', 'comptaai.db'))
 
 class TestingConfig(Config):
     """Testing configuration."""
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:' # Use in-memory DB for tests
+    #SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:' # Use in-memory DB for tests
+    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://comptaaiadm:comptaaiadm@localhost:5432/comptaai"
     WTF_CSRF_ENABLED = False

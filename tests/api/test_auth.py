@@ -95,5 +95,33 @@ class AuthTestCase(unittest.TestCase):
         data = json.loads(res_after_logout.data)
         self.assertEqual(data['error'], 'Authentication required')
 
+    def test_change_password(self):
+        """Test changing a user's password."""
+        self._register_user()
+        self._login_user()
+
+        # Case 1: Wrong old password
+        res_wrong = self.client.post(
+            '/api/auth/change-password',
+            data=json.dumps(dict(old_password="wrong", new_password="newpassword")),
+            content_type='application/json'
+        )
+        self.assertEqual(res_wrong.status_code, 403)
+        self.assertIn(b'Invalid old password', res_wrong.data)
+
+        # Case 2: Successful password change
+        res_success = self.client.post(
+            '/api/auth/change-password',
+            data=json.dumps(dict(old_password="password", new_password="newpassword")),
+            content_type='application/json'
+        )
+        self.assertEqual(res_success.status_code, 200)
+        self.assertIn(b'Password updated successfully', res_success.data)
+
+        # Verify the new password works for login
+        self.client.post('/api/auth/logout') # Logout first
+        res_login_new = self._login_user(password="newpassword")
+        self.assertEqual(res_login_new.status_code, 200)
+
 if __name__ == '__main__':
     unittest.main()

@@ -62,3 +62,25 @@ def get_current_user_profile():
         'username': current_user.username,
         'role': current_user.role
     })
+
+@auth.route('/change-password', methods=['POST'])
+@login_required
+def change_password():
+    """Changes the current user's password."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    old_password = data.get('old_password')
+    new_password = data.get('new_password')
+
+    if not old_password or not new_password:
+        return jsonify({"error": "Old and new passwords are required"}), 400
+
+    if not bcrypt.check_password_hash(current_user.password_hash, old_password):
+        return jsonify({"error": "Invalid old password"}), 403 # Forbidden
+
+    current_user.password_hash = bcrypt.generate_password_hash(new_password).decode('utf-8')
+    db.session.commit()
+
+    return jsonify({"message": "Password updated successfully"}), 200

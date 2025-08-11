@@ -7,27 +7,24 @@
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; background-color: #f4f7f6; color: #333; }
         .container { width: 100%; height: 100vh; display: flex; flex-direction: column; }
-        /* Auth Form Styles */
         .auth-wrapper { flex-grow: 1; display: flex; justify-content: center; align-items: center; }
         .auth-container { max-width: 400px; width: 100%; margin: auto; padding: 2em; background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .auth-container h2 { text-align: center; color: #2a7a7b; }
         .form-group { margin-bottom: 1.5em; }
         .form-group label { display: block; margin-bottom: 0.5em; font-weight: bold; }
         .form-group input { width: 100%; padding: 0.8em; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .btn { display: block; width: 100%; background-color: #2a7a7b; color: white; padding: 0.8em 1.2em; border: none; border-radius: 5px; text-decoration: none; font-weight: bold; text-align: center; cursor: pointer; font-size: 1em; }
+        .btn { display: inline-block; background-color: #2a7a7b; color: white; padding: 0.8em 1.2em; border: none; border-radius: 5px; text-decoration: none; font-weight: bold; text-align: center; cursor: pointer; font-size: 1em; }
         .btn:hover { background-color: #236667; }
         .toggle-link { text-align: center; margin-top: 1em; }
         .toggle-link a { color: #2a7a7b; text-decoration: none; cursor: pointer; }
         .message { padding: 0.5em; margin-top: 1em; text-align: center; border-radius: 4px; }
         .message.error { color: #d9534f; background-color: #f2dede; }
         .message.success { color: #3c763d; background-color: #dff0d8; }
-        /* Layout Styles */
         header { background-color: #2a7a7b; color: white; padding: 1em 2em; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
         header h1 { margin: 0; font-size: 1.5em; }
         .main-content-area { padding: 2em; }
         h2.page-title { color: #2a7a7b; }
         .hidden { display: none; }
-        /* Nav & User Menu Styles */
         nav { display: flex; align-items: center; }
         nav a.nav-link { color: white; text-decoration: none; font-weight: bold; margin-right: 1.5em; }
         .user-menu { position: relative; }
@@ -37,52 +34,41 @@
         .dropdown-menu a, .dropdown-menu button { display: block; width: 100%; text-align: left; padding: 0.75em 1.5em; color: #333; text-decoration: none; background: none; border: none; cursor: pointer; font-size: 1em; box-sizing: border-box; }
         .dropdown-menu a:hover, .dropdown-menu button:hover { background-color: #f4f7f6; }
         .dropdown-divider { height: 1px; background-color: #eee; margin: 0.5em 0; }
-        /* Card Styles */
-        .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5em; margin-top: 2em; }
         .card { background-color: white; border: 1px solid #ddd; border-radius: 8px; padding: 1.5em; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5em; margin-top: 2em; }
         .card h3 { margin-top: 0; font-size: 1em; color: #666; }
         .card .value { font-size: 2.2em; font-weight: bold; color: #2a7a7b; margin: 0.5em 0 0 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 2em; background-color: white; }
+        th, td { text-align: left; padding: 0.8em; border-bottom: 1px solid #ddd; }
+        th { background-color: #e9ecef; }
+        tr:hover { background-color: #f4f7f6; }
     </style>
 </head>
 <body>
     <div id="app-container" class="container">
-        <!-- Loading View -->
-        <div id="loading-view">
-            <p style="text-align: center;">Chargement...</p>
-        </div>
+        <div id="loading-view"><p style="text-align: center;">Chargement...</p></div>
 
-        <!-- Authentication View -->
         <div id="auth-view" class="hidden auth-wrapper">
             <div class="auth-container">
                 <div id="login-form-container">
                     <h2>Connexion</h2>
-                    <form id="login-form">
-                        <div class="form-group"><label for="login-username">Nom d'utilisateur</label><input type="text" id="login-username" required></div>
-                        <div class="form-group"><label for="login-password">Mot de passe</label><input type="password" id="login-password" required></div>
-                        <button type="submit" class="btn">Se connecter</button>
-                    </form>
-                    <p id="login-error" class="message error hidden"></p>
-                    <p class="toggle-link">Pas de compte ? <a id="show-register-link">Inscrivez-vous</a></p>
+                    <form id="login-form"><div class="form-group"><label for="login-username">Nom d'utilisateur</label><input type="text" id="login-username" required></div><div class="form-group"><label for="login-password">Mot de passe</label><input type="password" id="login-password" required></div><button type="submit" class="btn" style="width: 100%;">Se connecter</button></form>
+                    <p id="login-error" class="message error hidden"></p><p class="toggle-link">Pas de compte ? <a id="show-register-link">Inscrivez-vous</a></p>
                 </div>
                 <div id="register-form-container" class="hidden">
                     <h2>Inscription</h2>
-                    <form id="register-form">
-                        <div class="form-group"><label for="register-username">Nom d'utilisateur</label><input type="text" id="register-username" required></div>
-                        <div class="form-group"><label for="register-password">Mot de passe</label><input type="password" id="register-password" required></div>
-                        <button type="submit" class="btn">S'inscrire</button>
-                    </form>
-                    <p id="register-message" class="message hidden"></p>
-                    <p class="toggle-link">Déjà un compte ? <a id="show-login-link">Connectez-vous</a></p>
+                    <form id="register-form"><div class="form-group"><label for="register-username">Nom d'utilisateur</label><input type="text" id="register-username" required></div><div class="form-group"><label for="register-password">Mot de passe</label><input type="password" id="register-password" required></div><button type="submit" class="btn" style="width: 100%;">S'inscrire</button></form>
+                    <p id="register-message" class="message hidden"></p><p class="toggle-link">Déjà un compte ? <a id="show-login-link">Connectez-vous</a></p>
                 </div>
             </div>
         </div>
 
-        <!-- Main App View (for authenticated users) -->
         <div id="main-app-view" class="hidden">
             <header>
                 <h1>ComptaAI</h1>
                 <nav>
                     <a href="#" id="nav-dashboard-link" class="nav-link">Tableau de Bord</a>
+                    <a href="#" id="nav-invoices-link" class="nav-link">Factures</a>
                     <div class="user-menu">
                         <span id="user-menu-trigger" class="user-menu-trigger">--</span>
                         <ul class="dropdown-menu">
@@ -95,39 +81,31 @@
             </header>
 
             <main id="main-content-area" class="main-content-area">
-                <div id="dashboard-view">
+                <div id="dashboard-view" class="hidden">
                     <h2 class="page-title">Résumé Financier</h2>
-                    <div class="summary">
-                        <div class="card"><h3>Chiffre d'Affaires Total</h3><p class="value" id="total-revenue">--</p></div>
-                        <div class="card"><h3>Dépenses Totales (HT)</h3><p class="value" id="total-expenses-ht">--</p></div>
-                        <div class="card"><h3>Résultat Net</h3><p class="value" id="net-profit-loss">--</p></div>
-                        <div class="card"><h3>TVA Déductible</h3><p class="value" id="total-vat-deductible">--</p></div>
-                    </div>
+                    <div class="summary"><div class="card"><h3>Chiffre d'Affaires Total</h3><p class="value" id="total-revenue">--</p></div><div class="card"><h3>Dépenses Totales (HT)</h3><p class="value" id="total-expenses-ht">--</p></div><div class="card"><h3>Résultat Net</h3><p class="value" id="net-profit-loss">--</p></div><div class="card"><h3>TVA Déductible</h3><p class="value" id="total-vat-deductible">--</p></div></div>
                     <h2 class="page-title" style="margin-top: 2em;">Exports Comptables</h2>
-                    <div class="summary">
-                        <div class="card" style="grid-column: 1 / -1; max-width: 500px; margin: auto; text-align: center;">
-                            <h3>Export FEC</h3>
-                            <p>Télécharger le Fichier des Écritures Comptables.</p>
-                            <a href="/api/export/fec" class="btn" download="FEC.txt" style="display: inline-block; width: auto;">Télécharger</a>
-                        </div>
-                    </div>
+                    <div class="summary"><div class="card" style="grid-column: 1 / -1; max-width: 500px; margin: auto; text-align: center;"><h3>Export FEC</h3><p>Télécharger le Fichier des Écritures Comptables.</p><a href="/api/export/fec" class="btn" download="FEC.txt">Télécharger</a></div></div>
                 </div>
                 <div id="profile-view" class="hidden">
                     <h2 class="page-title">Profil Utilisateur</h2>
                     <div class="card" style="max-width: 500px; margin: auto; text-align: left;">
                         <h3>Vos informations</h3>
-                        <div id="profile-info" style="margin-bottom: 2em;">
-                            <p><strong>Nom d'utilisateur:</strong> <span id="profile-username">--</span></p>
-                            <p><strong>Rôle:</strong> <span id="profile-role">--</span></p>
-                        </div>
+                        <div id="profile-info" style="margin-bottom: 2em;"><p><strong>Nom d'utilisateur:</strong> <span id="profile-username">--</span></p><p><strong>Rôle:</strong> <span id="profile-role">--</span></p></div>
                         <h3>Changer le mot de passe</h3>
-                        <form id="change-password-form">
-                            <div class="form-group"><label for="old-password">Ancien mot de passe</label><input type="password" id="old-password" required></div>
-                            <div class="form-group"><label for="new-password">Nouveau mot de passe</label><input type="password" id="new-password" required></div>
-                            <button type="submit" class="btn" style="width: auto; display: inline-block;">Changer</button>
-                        </form>
+                        <form id="change-password-form"><div class="form-group"><label for="old-password">Ancien mot de passe</label><input type="password" id="old-password" required></div><div class="form-group"><label for="new-password">Nouveau mot de passe</label><input type="password" id="new-password" required></div><button type="submit" class="btn">Changer</button></form>
                         <p id="change-password-message" class="message hidden"></p>
                     </div>
+                </div>
+                <div id="invoices-view" class="hidden">
+                    <h2 class="page-title">Gestion des Factures</h2>
+                    <div class="card" style="margin-bottom: 2em;">
+                        <h3>Téléverser une nouvelle facture</h3>
+                        <form id="upload-invoice-form"><div class="form-group"><label for="invoice-file">Fichier (PDF, PNG, JPG)</label><input type="file" id="invoice-file" accept=".pdf,.png,.jpg,.jpeg" required></div><button type="submit" class="btn">Téléverser</button></form>
+                        <p id="upload-message" class="message hidden"></p>
+                    </div>
+                    <h3>Factures existantes</h3>
+                    <div class="card"><table id="invoices-table"><thead><tr><th>Fichier</th><th>Fournisseur</th><th>Date</th><th>Total TTC</th><th>Statut</th></tr></thead><tbody id="invoices-list"></tbody></table></div>
                 </div>
             </main>
         </div>
@@ -141,8 +119,9 @@
             const mainAppView = document.getElementById('main-app-view');
             const dashboardView = document.getElementById('dashboard-view');
             const profileView = document.getElementById('profile-view');
+            const invoicesView = document.getElementById('invoices-view');
 
-            // Auth Forms
+            // Auth
             const loginForm = document.getElementById('login-form');
             const registerForm = document.getElementById('register-form');
             const loginFormContainer = document.getElementById('login-form-container');
@@ -152,152 +131,67 @@
             const loginError = document.getElementById('login-error');
             const registerMessage = document.getElementById('register-message');
 
-            // Main App Navigation
+            // Navigation
             const logoutBtn = document.getElementById('logout-btn');
             const userMenuTrigger = document.getElementById('user-menu-trigger');
             const navDashboardLink = document.getElementById('nav-dashboard-link');
+            const navInvoicesLink = document.getElementById('nav-invoices-link');
             const navProfileLink = document.getElementById('nav-profile-link');
 
-            // Profile Page
+            // Profile
             const profileUsername = document.getElementById('profile-username');
             const profileRole = document.getElementById('profile-role');
             const changePasswordForm = document.getElementById('change-password-form');
             const changePasswordMessage = document.getElementById('change-password-message');
 
-            // --- Utility Functions ---
-            const showMessage = (element, text, isSuccess) => {
-                element.textContent = text;
-                element.className = 'message'; // reset classes
-                element.classList.add(isSuccess ? 'success' : 'error');
-                element.classList.remove('hidden');
+            // Invoices
+            const uploadInvoiceForm = document.getElementById('upload-invoice-form');
+            const invoiceFile = document.getElementById('invoice-file');
+            const invoicesList = document.getElementById('invoices-list');
+            const uploadMessage = document.getElementById('upload-message');
+
+            const showMessage = (el, text, isSuccess) => {
+                el.textContent = text;
+                el.className = 'message';
+                el.classList.add(isSuccess ? 'success' : 'error');
+                el.classList.remove('hidden');
             };
+            const hideMessage = (el) => el.classList.add('hidden');
 
-            const hideMessage = (element) => element.classList.add('hidden');
+            const switchTopLevelView = (view) => [loadingView, authView, mainAppView].forEach(v => v.id === view.id ? v.classList.remove('hidden') : v.classList.add('hidden'));
+            const switchContentView = (view) => [dashboardView, profileView, invoicesView].forEach(v => v.id === view.id ? v.classList.remove('hidden') : v.classList.add('hidden'));
 
-            const switchTopLevelView = (viewToShow) => {
-                loadingView.classList.add('hidden');
-                authView.classList.add('hidden');
-                mainAppView.classList.add('hidden');
-                viewToShow.classList.remove('hidden');
-            };
-
-            const switchContentView = (viewToShow) => {
-                dashboardView.classList.add('hidden');
-                profileView.classList.add('hidden');
-                viewToShow.classList.remove('hidden');
-            };
-
-            // --- API Fetching ---
-            const fetchSummary = () => {
-                fetch('/api/summary').then(res => res.json()).then(data => {
-                    document.getElementById('total-revenue').textContent = data.total_revenue.toFixed(2) + ' €';
-                    document.getElementById('total-expenses-ht').textContent = data.total_expenses_ht.toFixed(2) + ' €';
-                    document.getElementById('net-profit-loss').textContent = data.net_profit_loss.toFixed(2) + ' €';
-                    document.getElementById('total-vat-deductible').textContent = data.total_vat_deductible.toFixed(2) + ' €';
-                }).catch(() => switchTopLevelView(authView));
-            };
-
-            const fetchProfile = () => {
-                fetch('/api/auth/profile').then(res => res.json()).then(data => {
-                    profileUsername.textContent = data.username;
-                    profileRole.textContent = data.role;
-                }).catch(() => switchTopLevelView(authView));
+            const fetchSummary = () => fetch('/api/summary').then(r=>r.json()).then(d=>{document.getElementById('total-revenue').textContent=d.total_revenue.toFixed(2)+' €';document.getElementById('total-expenses-ht').textContent=d.total_expenses_ht.toFixed(2)+' €';document.getElementById('net-profit-loss').textContent=d.net_profit_loss.toFixed(2)+' €';document.getElementById('total-vat-deductible').textContent=d.total_vat_deductible.toFixed(2)+' €';}).catch(()=>switchTopLevelView(authView));
+            const fetchProfile = () => fetch('/api/auth/profile').then(r=>r.json()).then(d=>{profileUsername.textContent=d.username;profileRole.textContent=d.role;}).catch(()=>switchTopLevelView(authView));
+            const fetchInvoices = () => {
+                fetch('/api/invoices').then(r=>r.json()).then(invoices=>{
+                    invoicesList.innerHTML = '';
+                    if(invoices.length===0){invoicesList.innerHTML='<tr><td colspan="5" style="text-align:center;">Aucune facture.</td></tr>';return;}
+                    invoices.forEach(inv=>{const r=document.createElement('tr');r.innerHTML=`<td>${inv.filename}</td><td>${inv.supplier||'N/A'}</td><td>${inv.invoice_date||'N/A'}</td><td>${inv.total_ttc||'N/A'} €</td><td>${inv.status}</td>`;invoicesList.appendChild(r);});
+                }).catch(()=>invoicesList.innerHTML='<tr><td colspan="5" style="text-align:center;color:red;">Erreur de chargement.</td></tr>');
             };
 
             const checkAuthStatus = () => {
-                fetch('/api/auth/profile')
-                    .then(res => res.ok ? res.json() : Promise.reject(res))
-                    .then(user => {
-                        userMenuTrigger.textContent = user.username;
-                        switchTopLevelView(mainAppView);
-                        switchContentView(dashboardView);
-                        fetchSummary();
-                    })
-                    .catch(() => switchTopLevelView(authView));
+                fetch('/api/auth/profile').then(r=>r.ok?r.json():Promise.reject(r)).then(user=>{
+                    userMenuTrigger.textContent=user.username;
+                    switchTopLevelView(mainAppView);
+                    switchContentView(dashboardView);
+                    fetchSummary();
+                }).catch(()=>switchTopLevelView(authView));
             };
 
-            // --- Event Listeners ---
-            showRegisterLink.addEventListener('click', () => {
-                loginFormContainer.classList.add('hidden');
-                registerFormContainer.classList.remove('hidden');
-            });
+            showRegisterLink.addEventListener('click',()=>{loginFormContainer.classList.add('hidden');registerFormContainer.classList.remove('hidden');});
+            showLoginLink.addEventListener('click',()=>{registerFormContainer.classList.add('hidden');loginFormContainer.classList.remove('hidden');});
 
-            showLoginLink.addEventListener('click', () => {
-                registerFormContainer.classList.add('hidden');
-                loginFormContainer.classList.remove('hidden');
-            });
+            loginForm.addEventListener('submit',e=>{e.preventDefault();hideMessage(loginError);const u=document.getElementById('login-username').value,p=document.getElementById('login-password').value;fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})}).then(r=>r.json().then(d=>({ok:r.ok,d}))).then(({ok,d})=>{if(ok)checkAuthStatus();else showMessage(loginError,d.error||'Erreur',!1);});});
+            registerForm.addEventListener('submit',e=>{e.preventDefault();hideMessage(registerMessage);const u=document.getElementById('register-username').value,p=document.getElementById('register-password').value;fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})}).then(r=>r.json().then(d=>({ok:r.ok,d}))).then(({ok,d})=>{if(ok){showMessage(registerMessage,'Inscription réussie!',!0);showLoginLink.click();}else showMessage(registerMessage,d.error||'Erreur',!1);});});
+            logoutBtn.addEventListener('click',()=>{fetch('/api/auth/logout',{method:'POST'}).finally(()=>switchTopLevelView(authView));});
+            navDashboardLink.addEventListener('click',e=>{e.preventDefault();switchContentView(dashboardView);});
+            navInvoicesLink.addEventListener('click',e=>{e.preventDefault();switchContentView(invoicesView);fetchInvoices();});
+            navProfileLink.addEventListener('click',e=>{e.preventDefault();switchContentView(profileView);fetchProfile();});
+            changePasswordForm.addEventListener('submit',e=>{e.preventDefault();hideMessage(changePasswordMessage);const o=document.getElementById('old-password').value,n=document.getElementById('new-password').value;fetch('/api/auth/change-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({old_password:o,new_password:n})}).then(r=>r.json().then(d=>({ok:r.ok,d}))).then(({ok,d})=>{showMessage(changePasswordMessage,d.message||d.error,ok);if(ok)changePasswordForm.reset();});});
+            uploadInvoiceForm.addEventListener('submit',e=>{e.preventDefault();hideMessage(uploadMessage);const f=invoiceFile.files[0];if(!f){showMessage(uploadMessage,'Veuillez sélectionner un fichier.',!1);return;}const d=new FormData();d.append('file',f);fetch('/api/invoices/upload',{method:'POST',body:d}).then(r=>r.json().then(d=>({ok:r.ok,d}))).then(({ok,d})=>{showMessage(uploadMessage,d.message||d.error,ok);if(ok){uploadInvoiceForm.reset();fetchInvoices();}});});
 
-            loginForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                hideMessage(loginError);
-                const username = document.getElementById('login-username').value;
-                const password = document.getElementById('login-password').value;
-                fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ username, password })
-                })
-                .then(res => res.json().then(data => ({ok: res.ok, data})))
-                .then(({ok, data}) => {
-                    if (ok) checkAuthStatus();
-                    else showMessage(loginError, data.error || 'Erreur de connexion.', false);
-                });
-            });
-
-            registerForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                hideMessage(registerMessage);
-                const username = document.getElementById('register-username').value;
-                const password = document.getElementById('register-password').value;
-                fetch('/api/auth/register', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ username, password })
-                })
-                .then(res => res.json().then(data => ({ok: res.ok, data})))
-                .then(({ok, data}) => {
-                    if (ok) {
-                        showMessage(registerMessage, 'Inscription réussie ! Vous pouvez maintenant vous connecter.', true);
-                        showLoginLink.click();
-                    } else {
-                        showMessage(registerMessage, data.error || 'Erreur d\'inscription.', false);
-                    }
-                });
-            });
-
-            logoutBtn.addEventListener('click', () => {
-                fetch('/api/auth/logout', { method: 'POST' }).finally(() => switchTopLevelView(authView));
-            });
-
-            navDashboardLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                switchContentView(dashboardView);
-            });
-
-            navProfileLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                switchContentView(profileView);
-                fetchProfile();
-            });
-
-            changePasswordForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                hideMessage(changePasswordMessage);
-                const old_password = document.getElementById('old-password').value;
-                const new_password = document.getElementById('new-password').value;
-                fetch('/api/auth/change-password', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ old_password, new_password })
-                })
-                .then(res => res.json().then(data => ({ok: res.ok, data})))
-                .then(({ok, data}) => {
-                    showMessage(changePasswordMessage, data.message || data.error, ok);
-                    if(ok) changePasswordForm.reset();
-                });
-            });
-
-            // --- Initial Load ---
             checkAuthStatus();
         });
     </script>

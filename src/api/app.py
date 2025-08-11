@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 # --- Local Imports ---
 from src.api.extensions import db, bcrypt, login_manager, migrate
 from src.core.auth.models import User # Ensures user_loader is registered
+from src.core.invoicing.models import Invoice, LineItem # Ensures models are registered
 
 def create_app(config_object='src.config.DevelopmentConfig'):
     """Application factory pattern."""
@@ -42,6 +43,9 @@ def create_app(config_object='src.config.DevelopmentConfig'):
         # Blueprints
         from src.api.auth import auth as auth_blueprint
         app.register_blueprint(auth_blueprint, url_prefix='/api/auth')
+
+        from src.api.invoicing import invoicing as invoicing_blueprint
+        app.register_blueprint(invoicing_blueprint, url_prefix='/api/invoices')
 
         # Main application routes
         register_main_routes(app)

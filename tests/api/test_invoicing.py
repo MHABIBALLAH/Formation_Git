@@ -100,5 +100,31 @@ class InvoicingTestCase(unittest.TestCase):
         self.assertEqual(data[0]['filename'], 'synthetic_invoice.png')
         self.assertEqual(data[0]['status'], 'completed')
 
+    def test_validate_invoice(self):
+        """Test validating an invoice creates a transaction."""
+        # Step 1: Upload an invoice
+        invoice_path = os.path.join(self.app.config['BASE_DIR'], 'data', 'invoices', 'synthetic_invoice.png')
+        with open(invoice_path, 'rb') as img:
+            data = {'file': (img, 'synthetic_invoice.png')}
+            self.client.post('/api/invoices/upload', content_type='multipart/form-data', data=data)
+
+        invoice = Invoice.query.first()
+        self.assertIsNotNone(invoice)
+        self.assertEqual(invoice.status, 'completed')
+
+        # Step 2: Validate the invoice
+        res = self.client.post(f'/api/invoices/{invoice.id}/validate')
+        self.assertEqual(res.status_code, 200)
+        self.assertIn(b'validated and transaction created', res.data)
+
+        # Step 3: Verify the changes in the database
+        db.session.refresh(invoice) # Refresh the object from the DB
+        self.assertEqual(invoice.status, 'validated')
+        self.assertEqual(len(invoice.transactions), 1)
+
+        transaction = invoice.transactions[0]
+        self.assertEqual(transaction.transaction_type, 'debit')
+        self.assertEqual(transaction.amount, -120.00) # Based on synthetic_invoice.png
+
 if __name__ == '__main__':
     unittest.main()

@@ -18,6 +18,39 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+@invoicing.route('/<int:invoice_id>/validate', methods=['POST'])
+@login_required
+def validate_invoice(invoice_id):
+    """
+    Validates an invoice and creates the corresponding financial transaction.
+    """
+    invoice = Invoice.query.filter_by(id=invoice_id, user_id=current_user.id).first_or_404()
+
+    if invoice.status != 'completed':
+        return jsonify({'error': 'Only invoices with status "completed" can be validated.'}), 400
+
+    if not invoice.total_ttc or not invoice.invoice_date:
+        return jsonify({'error': 'Invoice is missing data required for transaction creation (date or total).'}), 400
+
+    from src.core.cashflow.models import Transaction
+    # For a sales invoice, this would be a credit. For a bill, a debit.
+    # We'll assume these are bills/expenses for now.
+    transaction = Transaction(
+        description=f"Dépense pour facture #{invoice.id} - {invoice.supplier}",
+        transaction_type='debit', # Assuming it's an expense
+        amount=invoice.total_ttc * -1, # Store expenses as negative numbers
+        transaction_date=invoice.invoice_date,
+        user_id=current_user.id,
+        invoice_id=invoice.id
+    )
+
+    invoice.status = 'validated'
+
+    db.session.add(transaction)
+    db.session.commit()
+
+    return jsonify({'message': f'Invoice {invoice.id} validated and transaction created.'}), 200
+
 @invoicing.route('/', methods=['GET'])
 @login_required
 def list_invoices():

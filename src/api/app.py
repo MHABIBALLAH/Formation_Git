@@ -6,7 +6,7 @@ from flask import Flask, jsonify, send_from_directory, make_response
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 # --- Local Imports ---
-from src.api.extensions import db, bcrypt, login_manager
+from src.api.extensions import db, bcrypt, login_manager, migrate
 from src.core.auth.models import User # Ensures user_loader is registered
 
 def create_app(config_object='src.config.DevelopmentConfig'):
@@ -22,6 +22,7 @@ def create_app(config_object='src.config.DevelopmentConfig'):
     db.init_app(app)
     bcrypt.init_app(app)
     login_manager.init_app(app)
+    migrate.init_app(app, db)
     login_manager.login_view = 'auth.login'
     login_manager.login_message = "Please log in to access this page."
     login_manager.login_message_category = 'info'

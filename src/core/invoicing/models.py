@@ -36,6 +36,8 @@ class LineItem(db.Model):
     quantity = db.Column(db.Numeric(10, 2), nullable=True, default=1)
     unit_price_ht = db.Column(db.Numeric(10, 2), nullable=True)
     total_ht = db.Column(db.Numeric(10, 2), nullable=False)
+    vat_rate = db.Column(db.Numeric(5, 2), nullable=True) # e.g., 20.00, 5.50
+    vat_amount = db.Column(db.Numeric(10, 2), nullable=True)
 
     # Relationships
     invoice_id = db.Column(db.Integer, db.ForeignKey('invoices.id'), nullable=False)

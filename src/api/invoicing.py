@@ -33,16 +33,41 @@ def validate_invoice(invoice_id):
         return jsonify({'error': 'Invoice is missing data required for transaction creation (date or total).'}), 400
 
     from src.core.cashflow.models import Transaction
+    from src.core.vat.models import VatRecord
+
     # For a sales invoice, this would be a credit. For a bill, a debit.
-    # We'll assume these are bills/expenses for now.
+    # We'll assume these are bills/expenses for now, so VAT is deductible.
     transaction = Transaction(
         description=f"Dépense pour facture #{invoice.id} - {invoice.supplier}",
-        transaction_type='debit', # Assuming it's an expense
-        amount=invoice.total_ttc * -1, # Store expenses as negative numbers
+        transaction_type='debit',
+        amount=invoice.total_ttc * -1,
         transaction_date=invoice.invoice_date,
         user_id=current_user.id,
         invoice_id=invoice.id
     )
+
+    # --- VAT Record Logic ---
+    if invoice.total_vat and invoice.total_vat > 0:
+        period_key = invoice.invoice_date.strftime('%Y-%m')
+        # Find or create the VatRecord for the period
+        vat_record = VatRecord.query.filter_by(user_id=current_user.id, period_key=period_key).first()
+        if not vat_record:
+            # Get the first and last day of the month
+            start_of_month = invoice.invoice_date.replace(day=1)
+            next_month = start_of_month.replace(day=28) + datetime.timedelta(days=4)
+            end_of_month = next_month - datetime.timedelta(days=next_month.day)
+            vat_record = VatRecord(
+                user_id=current_user.id,
+                period_key=period_key,
+                period_start_date=start_of_month,
+                period_end_date=end_of_month
+            )
+            db.session.add(vat_record)
+
+        # Add the invoice's VAT to the deductible total
+        vat_record.total_deductible_vat += invoice.total_vat
+        # Recalculate VAT due
+        vat_record.vat_due = vat_record.total_collected_vat - vat_record.total_deductible_vat
 
     invoice.status = 'validated'
 
@@ -109,7 +134,7 @@ def upload_invoice():
             invoice.invoice_date = datetime.datetime.strptime(extracted_data.get('date'), '%Y-%m-%d').date() if extracted_data.get('date') else None
             invoice.total_ht = extracted_data.get('total_ht')
             invoice.total_ttc = extracted_data.get('total_ttc')
-            invoice.total_vat = extracted_data.get('total_vat')
+            invoice.total_vat = extracted_data.get('vat_amount') # Correct key from extractor
             invoice.status = 'completed'
             invoice.processed_at = datetime.datetime.utcnow()
 

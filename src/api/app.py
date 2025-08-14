@@ -10,6 +10,7 @@ from src.api.extensions import db, bcrypt, login_manager, migrate
 from src.core.auth.models import User # Ensures user_loader is registered
 from src.core.invoicing.models import Invoice, LineItem # Ensures models are registered
 from src.core.cashflow.models import Transaction # Ensures models are registered
+from src.core.vat.models import VatRecord # Ensures models are registered
 
 def create_app(config_object='src.config.DevelopmentConfig'):
     """Application factory pattern."""
@@ -50,6 +51,9 @@ def create_app(config_object='src.config.DevelopmentConfig'):
 
         from src.api.cashflow import cashflow as cashflow_blueprint
         app.register_blueprint(cashflow_blueprint, url_prefix='/api/cashflow')
+
+        from src.api.vat import vat as vat_blueprint
+        app.register_blueprint(vat_blueprint, url_prefix='/api/vat')
 
         # Main application routes
         register_main_routes(app)

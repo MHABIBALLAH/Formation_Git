@@ -63,7 +63,38 @@
             <main id="main-content-area" class="main-content-area">
                 <div id="dashboard-view" class="hidden"><!-- Dashboard HTML --></div>
                 <div id="profile-view" class="hidden"><!-- Profile HTML --></div>
-                <div id="invoices-view" class="hidden"><!-- Invoices HTML --></div>
+                <div id="invoices-view" class="hidden">
+                    <h2 class="page-title">Factures</h2>
+                    <div class="card">
+                        <h3>Télécharger une nouvelle facture</h3>
+                        <form id="upload-invoice-form">
+                            <div class="form-group">
+                                <label for="invoice-file">Fichier de la facture</label>
+                                <input type="file" id="invoice-file" name="file" accept="image/*,.pdf">
+                            </div>
+                            <button type="submit" class="btn">Télécharger</button>
+                        </form>
+                        <div id="upload-message" class="message hidden"></div>
+                    </div>
+                    <div class="card" style="margin-top: 2em;">
+                        <h3>Factures existantes</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fichier</th>
+                                    <th>Fournisseur</th>
+                                    <th>Date</th>
+                                    <th>Total TTC</th>
+                                    <th>Statut</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="invoices-list">
+                                <!-- Invoice rows will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                 <div id="cashflow-view" class="hidden"><!-- Cashflow HTML --></div>
                 <div id="vat-view" class="hidden"><!-- VAT HTML --></div>
             </main>
@@ -85,9 +116,9 @@
             const hideMessage=el=>el.classList.add('hidden');
             const switchTopView=view=>Object.values(views).slice(0,3).forEach(v=>v===view?v.classList.remove('hidden'):v.classList.add('hidden'));
             const renderers={invoices:invoices=>{invoicesPage.list.innerHTML='';if(invoices.length===0){invoicesPage.list.innerHTML='<tr><td colspan="6" style="text-align:center;">Aucune facture.</td></tr>';return;}
-            invoices.forEach(inv=>{const r=document.createElement('tr');const btn=inv.status==='completed'?`<button class="btn btn-validate" data-invoice-id="${inv.id}">Valider</button>`:`<button class="btn" disabled>${inv.status}</button>`;r.innerHTML=`<td>${inv.filename}</td><td>${inv.supplier||'N/A'}</td><td>${inv.invoice_date||'N/A'}</td><td>${inv.total_ttc||'0.00'} €</td><td id="status-${inv.id}">${inv.status}</td><td>${btn}</td>`;invoicesPage.list.appendChild(r);});},cashflow:data=>{cashflowPage.inflows.textContent=`${data.total_inflows.toFixed(2)} €`;cashflowPage.outflows.textContent=`${data.total_outflows.toFixed(2)} €`;cashflowPage.balance.textContent=`${data.net_balance.toFixed(2)} €`;},vatReports:reports=>{vatPage.list.innerHTML='';if(reports.length===0){vatPage.list.innerHTML='<tr><td colspan="5" style="text-align:center;">Aucun rapport.</td></tr>';return;}
+            invoices.forEach(inv=>{const r=document.createElement('tr');const actions=`<button class="btn btn-summary" data-filename="${inv.filename}">Résumé</button> <button class="btn btn-export-fec" data-filename="${inv.filename}">Export FEC</button>`;r.innerHTML=`<td>${inv.filename}</td><td>${inv.supplier||'N/A'}</td><td>${inv.invoice_date||'N/A'}</td><td>${inv.total_ttc||'0.00'} €</td><td id="status-${inv.id}">${inv.status}</td><td>${actions}</td>`;invoicesPage.list.appendChild(r);});},cashflow:data=>{cashflowPage.inflows.textContent=`${data.total_inflows.toFixed(2)} €`;cashflowPage.outflows.textContent=`${data.total_outflows.toFixed(2)} €`;cashflowPage.balance.textContent=`${data.net_balance.toFixed(2)} €`;},vatReports:reports=>{vatPage.list.innerHTML='';if(reports.length===0){vatPage.list.innerHTML='<tr><td colspan="5" style="text-align:center;">Aucun rapport.</td></tr>';return;}
             reports.forEach(rec=>{const r=document.createElement('tr');r.innerHTML=`<td>${rec.period_key}</td><td>${rec.total_collected_vat} €</td><td>${rec.total_deductible_vat} €</td><td>${rec.vat_due} €</td><td>${rec.status}</td>`;vatPage.list.appendChild(r);});}};
-            const actions={stopCashflowPolling:()=>{if(state.cashflowPollingTimer){clearInterval(state.cashflowPollingTimer);state.cashflowPollingTimer=null;}},startCashflowPolling:fetchFn=>{actions.stopCashflowPolling();state.cashflowPollingTimer=setInterval(fetchFn,5000);},checkAuth:()=>{api.get('/api/auth/profile').then(user=>{state.currentUser=user;nav.userMenuTrigger.textContent=user.username;switchTopView(views.main);actions.showDashboard();}).catch(()=>{state.currentUser=null;actions.stopCashflowPolling();switchTopView(views.auth);});},showDashboard:()=>{switchContentView(views.dashboard);api.get('/api/summary').catch(()=>actions.checkAuth());},showInvoices:()=>{switchContentView(views.invoices);api.get('/api/invoices').then(renderers.invoices).catch(()=>invoicesPage.list.innerHTML='<tr><td colspan="6" style="text-align:center;color:red;">Erreur.</td></tr>');},showProfile:()=>{switchContentView(views.profile);api.get('/api/auth/profile').then(user=>{profilePage.username.textContent=user.username;profilePage.role.textContent=user.role;}).catch(()=>actions.checkAuth());},showCashflow:()=>{switchContentView(views.cashflow);const fetchAndRender=()=>{const sd=cashflowPage.form.elements['start-date'].value,ed=cashflowPage.form.elements['end-date'].value;const p=new URLSearchParams();if(sd)p.append('start_date',sd);if(ed)p.append('end_date',ed);const q=p.toString();api.get(`/api/cashflow${q?'?'+q:''}`).then(renderers.cashflow).catch(()=>renderers.cashflow({total_inflows:0,total_outflows:0,net_balance:0}));};fetchAndRender();actions.startCashflowPolling(fetchAndRender);},showVatReports:()=>{switchContentView(views.vat);const sd=vatPage.form.elements['vat-start-date'].value,ed=vatPage.form.elements['vat-end-date'].value;const p=new URLSearchParams();if(sd)p.append('start_date',sd);if(ed)p.append('end_date',ed);const q=p.toString();api.get(`/api/vat/reports${q?'?'+q:''}`).then(renderers.vatReports).catch(()=>vatPage.list.innerHTML='<tr><td colspan="5" style="text-align:center;color:red;">Erreur.</td></tr>');},};
+            const actions={stopCashflowPolling:()=>{if(state.cashflowPollingTimer){clearInterval(state.cashflowPollingTimer);state.cashflowPollingTimer=null;}},startCashflowPolling:fetchFn=>{actions.stopCashflowPolling();state.cashflowPollingTimer=setInterval(fetchFn,5000);},checkAuth:()=>{api.get('/api/auth/profile').then(user=>{state.currentUser=user;nav.userMenuTrigger.textContent=user.username;switchTopView(views.main);actions.showDashboard();}).catch(()=>{state.currentUser=null;actions.stopCashflowPolling();switchTopView(views.auth);});},showDashboard:()=>{switchContentView(views.dashboard);},showInvoices:()=>{switchContentView(views.invoices);api.get('/api/invoices').then(renderers.invoices).catch(()=>invoicesPage.list.innerHTML='<tr><td colspan="6" style="text-align:center;color:red;">Erreur.</td></tr>');},showProfile:()=>{switchContentView(views.profile);api.get('/api/auth/profile').then(user=>{profilePage.username.textContent=user.username;profilePage.role.textContent=user.role;}).catch(()=>actions.checkAuth());},showCashflow:()=>{switchContentView(views.cashflow);const fetchAndRender=()=>{const sd=cashflowPage.form.elements['start-date'].value,ed=cashflowPage.form.elements['end-date'].value;const p=new URLSearchParams();if(sd)p.append('start_date',sd);if(ed)p.append('end_date',ed);const q=p.toString();api.get(`/api/cashflow${q?'?'+q:''}`).then(renderers.cashflow).catch(()=>renderers.cashflow({total_inflows:0,total_outflows:0,net_balance:0}));};fetchAndRender();actions.startCashflowPolling(fetchAndRender);},showVatReports:()=>{switchContentView(views.vat);const sd=vatPage.form.elements['vat-start-date'].value,ed=vatPage.form.elements['vat-end-date'].value;const p=new URLSearchParams();if(sd)p.append('start_date',sd);if(ed)p.append('end_date',ed);const q=p.toString();api.get(`/api/vat/reports${q?'?'+q:''}`).then(renderers.vatReports).catch(()=>vatPage.list.innerHTML='<tr><td colspan="5" style="text-align:center;color:red;">Erreur.</td></tr>');},};
             const switchContentView=view=>{actions.stopCashflowPolling();Object.values(views).slice(3).forEach(v=>v===view?v.classList.remove('hidden'):v.classList.add('hidden'));};
             authForms.showRegisterLink.addEventListener('click',()=>{authForms.loginContainer.classList.add('hidden');authForms.registerContainer.classList.remove('hidden');});
             authForms.showLoginLink.addEventListener('click',()=>{authForms.registerContainer.classList.add('hidden');authForms.loginContainer.classList.remove('hidden');});
@@ -100,8 +131,20 @@
             nav.cashflowLink.addEventListener('click',e=>{e.preventDefault();actions.showCashflow();});
             nav.vatLink.addEventListener('click',e=>{e.preventDefault();actions.showVatReports();});
             profilePage.form.addEventListener('submit',e=>{e.preventDefault();hideMessage(profilePage.message);api.post('/api/auth/change-password',{old_password:e.target.elements['old-password'].value,new_password:e.target.elements['new-password'].value}).then(({ok,data})=>{showMessage(profilePage.message,data.message||data.error,ok);if(ok)profilePage.form.reset();});});
-            invoicesPage.form.addEventListener('submit',e=>{e.preventDefault();hideMessage(invoicesPage.message);const file=invoicesPage.fileInput.files[0];if(!file){showMessage(invoicesPage.message,'Veuillez sélectionner un fichier.',!1);return;}const fd=new FormData();fd.append('file',file);api.upload('/api/invoices/upload',fd).then(({ok,data})=>{showMessage(invoicesPage.message,data.message||data.error,ok);if(ok){invoicesPage.form.reset();actions.showInvoices();}});});
-            invoicesPage.list.addEventListener('click',e=>{if(e.target?.classList.contains('btn-validate')){const btn=e.target,id=btn.dataset.invoiceId;btn.disabled=!0;btn.textContent='...';api.post(`/api/invoices/${id}/validate`).then(({ok})=>{if(ok){document.getElementById(`status-${id}`).textContent='validated';btn.textContent='Validé';}else{btn.disabled=!1;btn.textContent='Valider';}}).catch(()=>{btn.disabled=!1;btn.textContent='Valider';});}});
+            invoicesPage.form.addEventListener('submit',e=>{e.preventDefault();hideMessage(invoicesPage.message);const file=invoicesPage.fileInput.files[0];if(!file){showMessage(invoicesPage.message,'Veuillez sélectionner un fichier.',!1);return;}const fd=new FormData();fd.append('file',file);api.upload('/api/upload',fd).then(({ok,data})=>{showMessage(invoicesPage.message,data.message||data.error,ok);if(ok){invoicesPage.form.reset();actions.showInvoices();}});});
+            invoicesPage.list.addEventListener('click',e=>{
+                if (e.target.classList.contains('btn-summary')) {
+                    const filename = e.target.dataset.filename;
+                    api.get(`/api/summary/${filename}`).then(data => {
+                        // Display the summary data in a modal or a designated area
+                        alert(JSON.stringify(data));
+                    }).catch(err => console.error('Error fetching summary:', err));
+                }
+                if (e.target.classList.contains('btn-export-fec')) {
+                    const filename = e.target.dataset.filename;
+                    window.location.href = `/api/export/fec/${filename}`;
+                }
+            });
             cashflowPage.form.addEventListener('submit',e=>{e.preventDefault();actions.showCashflow();});
             vatPage.form.addEventListener('submit',e=>{e.preventDefault();actions.showVatReports();});
             actions.checkAuth();

@@ -22,6 +22,6 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     """Testing configuration."""
     TESTING = True
-    #SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:' # Use in-memory DB for tests
-    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://comptaaiadm:comptaaiadm@localhost:5432/comptaai"
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:' # Use in-memory DB for tests
+    #SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://comptaaiadm:comptaaiadm@localhost:5432/comptaai"
     WTF_CSRF_ENABLED = False

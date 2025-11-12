@@ -59,6 +59,7 @@ def extract_invoice_data(text: str) -> Dict[str, Any]:
     Extracts structured data from raw OCR text using regular expressions.
     """
     patterns = {
+        'supplier': r"^(.*?)\n",
         'invoice_id': r"FACTURE N°:\s*(\S+)",
         'date': r"Date:\s*(\d{2}/\d{2}/\d{4})",
         'total_ht': r"Total HT:\s*([\d\s,.]+)",
@@ -82,6 +83,7 @@ def extract_invoice_data(text: str) -> Dict[str, Any]:
     line_items = _parse_line_items(text)
 
     data = {
+        'supplier': raw_data.get('supplier'),
         'invoice_id': raw_data.get('invoice_id'),
         'date': raw_data.get('date'),
         'total_ht': _parse_amount(raw_data.get('total_ht')),

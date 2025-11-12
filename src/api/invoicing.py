@@ -60,7 +60,9 @@ def validate_invoice(invoice_id):
                 user_id=current_user.id,
                 period_key=period_key,
                 period_start_date=start_of_month,
-                period_end_date=end_of_month
+                period_end_date=end_of_month,
+                total_collected_vat=0,
+                total_deductible_vat=0
             )
             db.session.add(vat_record)
 
@@ -76,7 +78,7 @@ def validate_invoice(invoice_id):
 
     return jsonify({'message': f'Invoice {invoice.id} validated and transaction created.'}), 200
 
-@invoicing.route('/', methods=['GET'])
+@invoicing.route('', methods=['GET'])
 @login_required
 def list_invoices():
     """Returns a list of invoices for the current user."""
@@ -131,7 +133,7 @@ def upload_invoice():
 
             # 3. Update invoice with extracted data
             invoice.supplier = extracted_data.get('supplier')
-            invoice.invoice_date = datetime.datetime.strptime(extracted_data.get('date'), '%Y-%m-%d').date() if extracted_data.get('date') else None
+            invoice.invoice_date = datetime.datetime.strptime(extracted_data.get('date'), '%d/%m/%Y').date() if extracted_data.get('date') else None
             invoice.total_ht = extracted_data.get('total_ht')
             invoice.total_ttc = extracted_data.get('total_ttc')
             invoice.total_vat = extracted_data.get('vat_amount') # Correct key from extractor
@@ -157,6 +159,11 @@ def upload_invoice():
             # 5. Handle errors
             invoice.status = 'error'
             db.session.commit()
+            import logging
+            logging.basicConfig(level=logging.INFO)
+            logging.info(f"Error processing invoice: {e}")
+            logging.info(f"Raw text: {raw_text}")
+            logging.info(f"Extracted data: {extracted_data}")
             # In a real app, log the error `e`
             return jsonify({'error': 'Failed to process invoice', 'details': str(e)}), 500
 

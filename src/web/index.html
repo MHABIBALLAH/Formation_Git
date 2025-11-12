@@ -48,7 +48,46 @@
 <body>
     <div id="app-container" class="container">
         <div id="loading-view"><p style="text-align: center;">Chargement...</p></div>
-        <div id="auth-view" class="hidden auth-wrapper"><!-- Auth HTML --></div>
+        <div id="auth-view" class="hidden auth-wrapper">
+            <div class="auth-container">
+                <div id="login-form-container">
+                    <h2>Connexion</h2>
+                    <form id="login-form">
+                        <div class="form-group">
+                            <label for="login-username">Nom d'utilisateur</label>
+                            <input type="text" id="login-username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Mot de passe</label>
+                            <input type="password" id="login-password" required>
+                        </div>
+                        <button type="submit" class="btn">Connexion</button>
+                    </form>
+                    <div id="login-error" class="message error hidden"></div>
+                    <div class="toggle-link">
+                        <p>Pas de compte ? <a id="show-register-link">Inscrivez-vous</a></p>
+                    </div>
+                </div>
+                <div id="register-form-container" class="hidden">
+                    <h2>Inscription</h2>
+                    <form id="register-form">
+                        <div class="form-group">
+                            <label for="register-username">Nom d'utilisateur</label>
+                            <input type="text" id="register-username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-password">Mot de passe</label>
+                            <input type="password" id="register-password" required>
+                        </div>
+                        <button type="submit" class="btn">S'inscrire</button>
+                    </form>
+                    <div id="register-message" class="message hidden"></div>
+                    <div class="toggle-link">
+                        <p>Déjà un compte ? <a id="show-login-link">Connectez-vous</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="main-app-view" class="hidden">
             <header>
                 <h1>ComptaAI</h1>
@@ -57,12 +96,46 @@
                     <a href="#" id="nav-invoices-link" class="nav-link">Factures</a>
                     <a href="#" id="nav-cashflow-link" class="nav-link">Flux de Trésorerie</a>
                     <a href="#" id="nav-vat-link" class="nav-link">TVA</a>
-                    <div class="user-menu"><!-- User Menu HTML --></div>
+                    <div class="user-menu">
+                        <span id="user-menu-trigger" class="user-menu-trigger"></span>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" id="nav-profile-link">Profil</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><button id="logout-btn">Déconnexion</button></li>
+                        </ul>
+                    </div>
                 </nav>
             </header>
             <main id="main-content-area" class="main-content-area">
-                <div id="dashboard-view" class="hidden"><!-- Dashboard HTML --></div>
-                <div id="profile-view" class="hidden"><!-- Profile HTML --></div>
+                <div id="dashboard-view" class="hidden">
+                    <h2 class="page-title">Tableau de Bord</h2>
+                    <div class="summary">
+                        <!-- Summary cards will be injected here -->
+                    </div>
+                </div>
+                <div id="profile-view" class="hidden">
+                    <h2 class="page-title">Profil Utilisateur</h2>
+                    <div class="card">
+                        <p><strong>Nom d'utilisateur :</strong> <span id="profile-username"></span></p>
+                        <p><strong>Rôle :</strong> <span id="profile-role"></span></p>
+                    </div>
+
+                    <div class="card" style="margin-top: 2em;">
+                        <h3>Changer le mot de passe</h3>
+                        <form id="change-password-form">
+                            <div class="form-group">
+                                <label for="old-password">Ancien mot de passe</label>
+                                <input type="password" id="old-password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="new-password">Nouveau mot de passe</label>
+                                <input type="password" id="new-password" required>
+                            </div>
+                            <button type="submit" class="btn">Mettre à jour</button>
+                        </form>
+                        <div id="change-password-message" class="message hidden"></div>
+                    </div>
+                </div>
                 <div id="invoices-view" class="hidden">
                     <h2 class="page-title">Factures</h2>
                     <div class="card">

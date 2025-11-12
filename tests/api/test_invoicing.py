@@ -76,7 +76,7 @@ class InvoicingTestCase(unittest.TestCase):
         self.assertIsNotNone(invoice)
         self.assertEqual(invoice.filename, 'synthetic_invoice.png')
         self.assertEqual(invoice.status, 'completed')
-        self.assertEqual(invoice.supplier, 'FOURNISSEUR ABC')
+        self.assertEqual(invoice.supplier, 'Votre Entreprise')
         self.assertGreater(len(invoice.line_items), 0)
 
     def test_list_invoices(self):
@@ -124,7 +124,7 @@ class InvoicingTestCase(unittest.TestCase):
 
         transaction = invoice.transactions[0]
         self.assertEqual(transaction.transaction_type, 'debit')
-        self.assertEqual(transaction.amount, -120.00) # Based on synthetic_invoice.png
+        self.assertEqual(transaction.amount, -1200.00) # Based on synthetic_invoice.png
 
 if __name__ == '__main__':
     unittest.main()

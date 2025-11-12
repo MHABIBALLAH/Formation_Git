@@ -1,6 +1,7 @@
 import os
 import sys
-from flask import Flask, jsonify, send_from_directory, make_response
+from flask import Flask, jsonify, send_from_directory, make_response, request
+from werkzeug.utils import secure_filename
 
 # --- Project Path Setup ---
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -77,13 +78,13 @@ def register_main_routes(app):
     def serve_dashboard():
         return send_from_directory(WEB_DIR, 'index.html')
 
-    @app.route('/api/summary')
+    @app.route('/api/summary/<string:filename>')
     @login_required
-    def get_financial_summary():
+    def get_financial_summary(filename):
         try:
-            invoice_path = os.path.join(DATA_DIR, 'synthetic_invoice.png')
+            invoice_path = os.path.join(DATA_DIR, filename)
             if not os.path.exists(invoice_path):
-                return jsonify({"error": "Sample invoice not found."}), 404
+                return jsonify({"error": "Invoice not found."}), 404
             raw_text = extract_text_from_image(invoice_path)
             invoice_data = extract_invoice_data(raw_text)
             summary_data = generate_financial_summary([invoice_data])
@@ -91,13 +92,13 @@ def register_main_routes(app):
         except Exception as e:
             return jsonify({"error": "An internal error occurred.", "details": str(e)}), 500
 
-    @app.route('/api/export/fec')
+    @app.route('/api/export/fec/<string:filename>')
     @login_required
-    def export_fec_file():
+    def export_fec_file(filename):
         try:
-            invoice_path = os.path.join(DATA_DIR, 'synthetic_invoice.png')
+            invoice_path = os.path.join(DATA_DIR, filename)
             if not os.path.exists(invoice_path):
-                return jsonify({"error": "Sample invoice not found."}), 404
+                return jsonify({"error": "Invoice not found."}), 404
             raw_text = extract_text_from_image(invoice_path)
             invoice_data = extract_invoice_data(raw_text)
             entries = generate_entries_from_invoice(invoice_data)
@@ -112,3 +113,17 @@ def register_main_routes(app):
     @app.route('/api/health')
     def health_check():
         return jsonify({"status": "ok"})
+
+    @app.route('/api/upload', methods=['POST'])
+    @login_required
+    def upload_file():
+        if 'file' not in request.files:
+            return jsonify({"error": "No file part"}), 400
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "No selected file"}), 400
+        if file:
+            filename = secure_filename(file.filename)
+            upload_path = os.path.join(DATA_DIR, filename)
+            file.save(upload_path)
+            return jsonify({"message": "File uploaded successfully", "filename": filename})
